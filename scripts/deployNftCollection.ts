@@ -1,14 +1,26 @@
-import { toNano, Address, beginCell } from '@ton/core';
+import { toNano } from '@ton/core';
 import { NftCollectionWrap } from '../wrappers/Nft';
 import { NetworkProvider } from '@ton/blueprint';
-
-const { NftCollection } = NftCollectionWrap;
+import { beginCell } from '@ton/ton';
 
 export async function run(provider: NetworkProvider) {
     const addr = provider.sender().address!!;
-    const nft = provider.open(await NftCollection.fromInit(0n, beginCell().endCell(), beginCell().endCell(), 0n, addr));
 
-    await nft.send(
+    const { NftCollection } = NftCollectionWrap;
+
+    const nftCollectionContentUrl =
+        'https://cloudflare-ipfs.com/ipfs/QmYvP3RsDpBQiNSxueZkgEhqsJA17oJk3vjkMFfN7ZvFTv?filename=collection_meta.json';
+    const nftItemContentUrl = 'https://d2126epqdbsmq2.cloudfront.net/info/';
+    const nftCollection = provider.open(
+        await NftCollection.fromInit(
+            0n,
+            beginCell().storeUint(1, 8).storeStringTail(nftCollectionContentUrl).endCell(),
+            0n,
+            addr,
+        ),
+    );
+
+    await nftCollection.send(
         provider.sender(),
         {
             value: toNano('0.05'),
@@ -19,7 +31,7 @@ export async function run(provider: NetworkProvider) {
         },
     );
 
-    await provider.waitForDeploy(nft.address);
+    await provider.waitForDeploy(nftCollection.address);
 
-    console.log(`NftCollection deployed at ${nft.address}`);
+    // run methods on `nft`
 }

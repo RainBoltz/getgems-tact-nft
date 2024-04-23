@@ -1,3 +1,28 @@
+// structs
+struct NftData {
+    init: Int as uint32;
+    index: Int as uint64;
+    collection_address: Address;
+    owner_address: Address?;
+    content: Cell?; // nft item content uri
+}
+struct NftCollectionData {
+    next_item_index: Int as uint64;
+    content: Cell;
+    owner_address: Address;
+}
+struct RoyaltyParams {
+    numerator: Int as uint16;
+    denominator: Int as uint16;
+    destination: Address;
+}
+struct NftContent {
+    offchain_tag: Int as uint8;
+    common_content: Slice; // Base url for NFT items metadata
+    individual_nft_content: Cell; // nft item content uri
+}
+
+
 message(0x5fcc3d14) Transfer {
     query_id: Int as uint64;
     new_owner_address: Address;
@@ -33,7 +58,7 @@ message(0x693d3950) GetRoyaltyParams {
 }
 message(0xa8cb00ad) ReportRoyaltyParams {
     query_id: Int as uint64;
-    royalty_params: Cell;
+    royalty_params: RoyaltyParams;
 }
 
 // NFT Collection specified
@@ -52,36 +77,12 @@ message(0x00000003) NftCollectionChangeOwner {
     query_id: Int as uint64;
     new_owner: Address;
 }
-message(0x00000004) NftCollectionChangeContent {
-    query_id: Int as uint64;
-    new_content: Cell;
-    new_royalty_params: Cell;
-}
 message(0x00000005) NftCollectionReturnBalance {
     query_id: Int as uint64;
 }
 message(0x00000006) NftCollectionChangeSecondOwner {
     query_id: Int as uint64;
     new_second_owner: Address;
-}
-
-//NFTEditable
-message(0x1a0b9d51) EditContent {
-    query_id: Int as uint64;
-    new_content: Cell;
-}
-message(0x1c04412a) TransferEditorship {
-    query_id: Int as uint64;
-    new_editor_address: Address;
-    response_destination: Address?;
-    custom_payload: Cell?;
-    forward_amount: Int as coins;
-    forward_payload: Slice as remaining;
-}
-message(0x511a4463) EditorshipAssigned {
-    query_id: Int as uint64;
-    prev_editor: Address;
-    forward_payload: Slice as remaining;
 }
 
 //TODO: SBT
