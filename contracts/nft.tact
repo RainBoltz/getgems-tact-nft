@@ -151,9 +151,6 @@ contract NftCollection with Deployable {
 
     receive(msg: GetRoyaltyParams){
         let ctx: Context = context();
-        if (ctx.bounced == true) {
-            return;
-        }
 
         let sender_address: Address = ctx.sender;
         send(SendParameters{
@@ -170,16 +167,13 @@ contract NftCollection with Deployable {
 
     receive(msg: NftCollectionDeployNewNft){
         let ctx: Context = context();
-        if (ctx.bounced == true) {
-            return;
-        }
 
         let sender_address: Address = ctx.sender;
         self.isOwner(sender_address);
 
         nativeThrowUnless(402, msg.item_index <= self.next_item_index);
 
-        self.deployNftItem(msg.item_index, msg.amount, msg.nft_content);
+        self.deployNftItem(msg.item_index, msg.nft_content);
 
         if(msg.item_index == self.next_item_index){
             self.next_item_index += 1;
@@ -192,9 +186,6 @@ contract NftCollection with Deployable {
 
     receive(msg: NftCollectionChangeOwner){
         let ctx: Context = context();
-        if (ctx.bounced == true) {
-            return;
-        }
 
         let sender_address: Address = ctx.sender;
         nativeThrowUnless(4001, sender_address == self.owner);
@@ -205,9 +196,6 @@ contract NftCollection with Deployable {
 
     receive(msg: NftCollectionReturnBalance){
         let ctx: Context = context();
-        if (ctx.bounced == true) {
-            return;
-        }
 
         let sender_address: Address = ctx.sender;
         self.isOwner(sender_address);
@@ -227,9 +215,6 @@ contract NftCollection with Deployable {
 
     receive(msg: NftCollectionChangeSecondOwner){
         let ctx: Context = context();
-        if (ctx.bounced == true) {
-            return;
-        }
 
         let sender_address: Address = ctx.sender;
         self.isOwner(sender_address);
@@ -245,7 +230,7 @@ contract NftCollection with Deployable {
         nativeThrowUnless(401, self.owner == address || self.second_owner == address);
     }
 
-    fun deployNftItem(itemIndex: Int, amount: Int, nftContent: Cell) {
+    fun deployNftItem(itemIndex: Int, nftContent: Cell) {
         let stateInit: StateInit = initOf Nft(self.next_item_index, myAddress());
         let nft_address: Address = contractAddress(stateInit);
         

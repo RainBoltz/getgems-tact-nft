@@ -65,7 +65,6 @@ message(0xa8cb00ad) ReportRoyaltyParams {
 message(0x00000001) NftCollectionDeployNewNft {
     query_id: Int as uint64;
     item_index: Int as uint64;
-    amount: Int as coins;
     nft_content: Cell;
 }
 message(0x00000002) NftCollectionBatchDeployNewNft {
