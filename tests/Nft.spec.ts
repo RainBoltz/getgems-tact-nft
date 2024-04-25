@@ -17,6 +17,7 @@ describe('Nft', () => {
 
     beforeEach(async () => {
         blockchain = await Blockchain.create();
+        deployer = await blockchain.treasury('deployer');
 
         nftCollection = blockchain.openContract(
             await NftCollection.fromInit(
@@ -27,8 +28,6 @@ describe('Nft', () => {
                 deployer.address,
             ),
         );
-
-        deployer = await blockchain.treasury('deployer');
 
         const deployResult = await nftCollection.send(
             deployer.getSender(),
