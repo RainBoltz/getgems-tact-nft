@@ -15,6 +15,7 @@ export async function run(provider: NetworkProvider) {
         await NftCollection.fromInit(
             0n,
             beginCell().storeUint(1, 8).storeStringTail(nftCollectionContentUrl).endCell(),
+            beginCell().storeUint(1, 8).storeStringTail(nftItemContentUrl).endCell(),
             0n,
             addr,
         ),

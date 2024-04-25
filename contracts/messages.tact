@@ -34,8 +34,8 @@ message(0x5fcc3d14) Transfer {
 message(0x0c4f4f90) DeployNft {
     // this is a custom message defined by Philip
     owner_address: Address;
+    common_content: Cell;
     content: Cell;
-    editor_address: Address;
 }
 message(0x05138d91) OwnershipAssigned {
     query_id: Int as uint64;

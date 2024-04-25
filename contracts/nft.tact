@@ -7,12 +7,14 @@ contract Nft {
     index: Int as uint64;
     collection_address: Address;
     owner_address: Address?;
+    common_content: Cell?;
     content: Cell?; // nft item content uri
 
     init(index: Int, collection_address: Address){
         self.index = index;
         self.collection_address = collection_address;
         self.owner_address = null;
+        self.common_content = null;
         self.content = null;
     }
 
@@ -22,9 +24,7 @@ contract Nft {
 
     receive(msg: Transfer){
         let ctx: Context = context();
-        if (ctx.bounced == true) {
-            return ;
-        }
+
         let sender_address: Address = ctx.sender;
         nativeThrowUnless(401, sender_address == self.owner_address!!);
         let new_owner_address: Address = msg.new_owner_address;
@@ -73,9 +73,7 @@ contract Nft {
 
     receive(msg: GetStaticData){
         let ctx: Context = context();
-        if (ctx.bounced == true) {
-            return ;
-        }
+
         let sender_address: Address = ctx.sender;
         send(SendParameters{
                 to: sender_address,
@@ -98,8 +96,9 @@ contract Nft {
 
         nativeThrowUnless(405, self.collection_address == sender_address);
         
-        if(self.owner_address == null && self.content == null){
+        if(self.owner_address == null && self.content == null && self.common_content == null){
             self.owner_address = msg.owner_address;
+            self.common_content = msg.common_content;
             self.content = msg.content;
         }
     }
@@ -135,13 +134,15 @@ contract NftCollection with Deployable {
     owner: Address;
     next_item_index: Int as uint64;
     content: Cell;
+    nft_item_content_common: Cell;
     royalty_params: RoyaltyParams;
     second_owner: Address?;
 
-    init(nextItemIndex: Int, collectionContentUrl: Cell, royaltyPercent: Int, royaltyAddress: Address){
+    init(nextItemIndex: Int, collectionContentUrl: Cell, nftContentBaseUrl: Cell, royaltyPercent: Int, royaltyAddress: Address){
         self.owner = context().sender;
         self.next_item_index = nextItemIndex;
         self.content = collectionContentUrl;
+        self.nft_item_content_common = nftContentBaseUrl;
         self.royalty_params = RoyaltyParams{ numerator: royaltyPercent, denominator: 100, destination: royaltyAddress };
     }
 
@@ -242,8 +243,8 @@ contract NftCollection with Deployable {
             data: stateInit.data,
             body: DeployNft{
                 owner_address: self.owner,
-                content: nftContent,
-                editor_address: self.owner
+                common_content: self.nft_item_content_common,
+                content: nftContent
             }.toCell()
         });
     }
@@ -272,5 +273,13 @@ contract NftCollection with Deployable {
         } else {
             return self.owner;
         }
+    }
+
+    get fun get_nft_content(index: Int, individual_nft_content: Cell): Cell {
+        let nft_content: Cell = beginCell()
+                                .storeSlice(self.nft_item_content_common.beginParse())
+                                .storeRef(individual_nft_content)
+                                .endCell();
+        return nft_content;
     }
 }
