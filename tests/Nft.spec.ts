@@ -1,7 +1,8 @@
-import { Blockchain, SandboxContract, TreasuryContract } from '@ton/sandbox';
+import { Blockchain, SandboxContract, TreasuryContract, printTransactionFees, wrapTonClient4ForRemote, RemoteBlockchainStorage } from '@ton/sandbox';
 import { toNano, beginCell } from '@ton/core';
 import { NftCollectionWrap } from '../wrappers/Nft';
 import '@ton/test-utils';
+import { TonClient4 } from '@ton/ton';
 
 describe('Nft', () => {
     const { NftCollection } = NftCollectionWrap;
@@ -16,7 +17,12 @@ describe('Nft', () => {
     let nftCollection: any;
 
     beforeEach(async () => {
-        blockchain = await Blockchain.create();
+        const remoteBlockchainStorage = new RemoteBlockchainStorage(wrapTonClient4ForRemote(
+            new TonClient4({
+                endpoint: 'http://192.168.1.90/jsonRPC',
+            }),
+        ));
+        blockchain = await Blockchain.create({ storage: remoteBlockchainStorage })
         deployer = await blockchain.treasury('deployer');
 
         nftCollection = blockchain.openContract(
@@ -66,6 +72,7 @@ describe('Nft', () => {
                 query_id: 0n,
                 item_index: itemIndex,
                 nft_content: beginCell().storeStringTail(`${itemIndex}`).endCell(),
+                response_destination: deployer.address,
             },
         );
 
@@ -75,5 +82,7 @@ describe('Nft', () => {
             deploy: false,
             success: true,
         });
+
+        printTransactionFees(mintResult.transactions);
     });
 });
